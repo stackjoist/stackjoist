@@ -1,11 +1,11 @@
-import type { AddonSummary } from '../addons/registry.js';
+import type { Addon } from '../addons/types.js';
 import type { Recipe } from '../recipes/types.js';
 import type { CommandContext } from './context.js';
 
 export function runList(
   ctx: CommandContext,
   recipes: readonly Recipe[],
-  addons: readonly AddonSummary[],
+  addons: readonly Addon[],
 ): void {
   const section = (title: string, items: ReadonlyArray<{ id: string; description: string }>) =>
     items.length === 0
@@ -20,6 +20,11 @@ export function runList(
       description: r.description,
       packageManagers: r.packageManagers,
     })),
-    addons,
+    addons: addons.map((a) => ({
+      id: a.id,
+      title: a.title,
+      description: a.description,
+      version: a.version,
+    })),
   });
 }

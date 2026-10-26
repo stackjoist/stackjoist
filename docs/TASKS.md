@@ -9,7 +9,7 @@ Status values: Todo / In Progress / Blocked / Done. Phases follow the approved b
 | P0    | Audit, baseline, decisions, docs                                                                                             | —          | Done   |
 | P1    | CLI core                                                                                                                     | P0         | Done   |
 | P2    | Recipe engine + Express + MongoDB + Mongoose                                                                                 | P1         | Done   |
-| P3    | Add-on engine + `ai-workflows` (Claude Code) + `ci-github`                                                                   | P1         | Todo   |
+| P3    | Add-on engine + `ai-workflows` (Claude Code) + `ci-github`                                                                   | P1         | Done   |
 | P4    | Vite + React + TS + Tailwind                                                                                                 | P2         | Todo   |
 | P5    | Next.js + TS + Tailwind                                                                                                      | P4         | Todo   |
 | P6    | NestJS + PostgreSQL + Prisma 7.x                                                                                             | P2         | Todo   |
@@ -59,7 +59,23 @@ Status values: Todo / In Progress / Blocked / Done. Phases follow the approved b
 | T2.5 | Verify runner                | `src/verify` runs a recipe's checks and reports PASS/FAIL/NOT RUN/BLOCKED                                                                                                                                                                                                                      | unit tests                                      | Done   |
 | T2.6 | Full recipe verification     | Script generates the recipe with npm and with pnpm in temp dirs → install → typecheck → lint → test → build; Compose file validated where Docker exists, else BLOCKED                                                                                                                          | `pnpm test:recipes` output recorded in PROGRESS | Done   |
 
-## P3–P7
+## P3 — Add-on engine + AI workflows (Claude Code) + CI add-on
+
+**Goal:** `stackjoist add <id>` safely changes an existing project, starting with the AI workflow and a GitHub Actions CI workflow.
+**Non-goals:** add-on removal, adapters for other agents (P8), qualitative evaluation of skills (manual checklist only).
+
+| ID   | Task                                 | Acceptance criteria                                                                                                                                                                                                                                                                                             | Verification         | Status |
+| ---- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------ |
+| T3.1 | Project inspector + state            | Reads package.json, lockfiles, frameworks, git; `.stackjoist/state.json` records installed add-ons and the sha256 of every managed file                                                                                                                                                                         | unit tests           | Done   |
+| T3.2 | Add-on engine                        | Change types: create / update / unchanged / adopt / sidecar (user-edited managed file → `<file>.stackjoist-new`) / conflict (unmanaged, differing file); preview; conflicts block `--yes` and need confirmation interactively; backups of every modified file in `.stackjoist/backups/<ts>/`; re-run is a no-op | unit + fixture tests | Done   |
+| T3.3 | `add` command                        | `add <id> [--dir] [--dry-run] [--yes] [--json]`; lists every changed file; `list` shows add-ons                                                                                                                                                                                                                 | CLI tests            | Done   |
+| T3.4 | AI assets                            | Owner AGENTS.md verbatim; 10 skills + `orchestrate`; 6 subagents; 3 hooks (Node, exec form); `workflow.json` version                                                                                                                                                                                            | validators           | Done   |
+| T3.5 | Claude Code adapter (`ai-workflows`) | Writes AGENTS.md, CLAUDE.md import line, `.claude/skills`, `.claude/agents`, `.claude/hooks`; merges hooks + `permissions.ask` into `.claude/settings.json` without touching user keys; never adds allow rules or bypass modes                                                                                  | fixture tests        | Done   |
+| T3.6 | Validators                           | Frontmatter schema (required fields, name rules, 1,536-char description cap, unknown fields), reference integrity, policy integrity, hook stdin fixtures                                                                                                                                                        | unit tests           | Done   |
+| T3.7 | `ci-github` add-on                   | `.github/workflows/ci.yml` for npm/pnpm running the scripts the project actually has; least-privilege permissions                                                                                                                                                                                               | fixture tests        | Done   |
+| T3.8 | Docs                                 | AI-WORKFLOWS.md updated to the implemented state, with a manual checklist                                                                                                                                                                                                                                       | review               | Done   |
+
+## P4–P7
 
 Detailed tasks are written at the start of each phase. Summary acceptance criteria live in [PRD.md](PRD.md#acceptance-criteria-v01).
 

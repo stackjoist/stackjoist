@@ -89,3 +89,22 @@ Format: context, decision, alternatives, consequences, status. The original base
 - **Decision:** Template files live in `assets/templates/<recipe>/` and are copied as-is; only listed files get `{{placeholder}}` substitution, and unknown placeholders fail generation. `package.json` is generated in code so tested version ranges live in one place. `.gitignore` is stored as `_gitignore` because npm never packs `.gitignore`.
 - **Alternatives:** Downloading templates at runtime (rejected: network dependency, supply-chain risk); copying from a git repo (same).
 - **Consequences:** Templates are versioned with the CLI and verified by the pack smoke test from an installed tarball.
+
+## ADR-013 — Add-on file ownership: managed vs merged, never overwrite
+
+- **Date:** 2026-10-26 · **Status:** Accepted
+- **Decision:** Files an add-on owns are hash-tracked in `.stackjoist/state.json` and replaced on update only if unchanged since StackJoist wrote them; otherwise the new version is written as `<file>.stackjoist-new`. Files the user owns (`CLAUDE.md`, `.claude/settings.json`) only receive idempotent merges. Unmanaged differing files are conflicts: `--yes` refuses; interactive confirmation writes sidecars only. Every replaced or merged file is backed up first. One state file for all add-ons replaces the earlier `ai-manifest.json` idea.
+- **Alternatives:** three-way merges (complex, error-prone for prose files); overwrite with backup (loses user intent silently).
+- **Consequences:** Updates are safe but may leave `.stackjoist-new` files for the user to merge. Removal is not automated.
+
+## ADR-014 — Claude Code hooks in exec form, failing open
+
+- **Date:** 2026-10-26 · **Status:** Accepted
+- **Decision:** Hooks are Node scripts registered as `"command": "node"` with `args: ["${CLAUDE_PROJECT_DIR}/.claude/hooks/…"]`, which the docs say runs without a shell on every OS. Scripts fail open on malformed input. Hard control comes from `permissions.ask` rules, which the docs say are evaluated before allow rules.
+- **Consequences:** Works on Windows without Git Bash. A broken hook never blocks work, so hooks are documented as a safety net only.
+
+## ADR-015 — GitHub Actions pinned to commit SHAs in generated CI
+
+- **Date:** 2026-10-26 · **Status:** Accepted
+- **Decision:** The `ci-github` add-on pins actions/checkout v7.0.1, actions/setup-node v7.1.0 and pnpm/action-setup v6.1.0 to full commit SHAs (verified via the GitHub API) with the version in a comment, uses `permissions: contents: read` and `persist-credentials: false`.
+- **Consequences:** A moved tag cannot change what runs; updating actions is a deliberate change.

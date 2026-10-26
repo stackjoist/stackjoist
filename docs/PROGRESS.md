@@ -2,40 +2,40 @@
 
 ## Current phase
 
-**P2 — Express + MongoDB + Mongoose: Done** (2026-10-26). Next: P3 (add-on engine + AI workflows for Claude Code).
+**P3 — Add-on engine + AI workflows + CI add-on: Done** (2026-10-26). Next: P4 (Vite + React + TypeScript + Tailwind recipe).
 
 ## Last completed
 
-- P1: CLI core (`create`, `list`, `doctor`, safe filesystem and process primitives).
-- P2:
-  - Template `assets/templates/express-mongoose/`: Express 5, Mongoose 9, Zod 4 env and request validation, helmet, CORS allowlist, pino logging, `app`/`start`/`server` split, `/health` + `/health/ready`, JSON 404/error handling, graceful shutdown, fail-fast startup, Docker Compose MongoDB (localhost only), `.env.example`, `notes` CRUD example, 29 tests.
-  - Engine: template asset loader (`_gitignore` → `.gitignore`, strict placeholders), async recipe plans, `package.json` generated in code, pnpm `allowBuilds` policy (ADR-011), verify runner, `pnpm test:recipes`.
-  - CLI error output now includes the last lines of a failed tool's output.
-- Owner request recorded as P8: Codex + Antigravity adapters and an expanded skills library (UI/UX and more).
-- Repo-local git setting `credential.https://github.com.username=khaledssbd`, so Git Credential Manager stops asking which of the two saved GitHub accounts to use.
+- P1 CLI core, P2 Express + MongoDB + Mongoose recipe (see git history and TASKS.md).
+- P3:
+  - Add-on engine: managed vs merged files, sidecars for user-edited files, conflicts block `--yes`, backups, `.stackjoist/state.json`, idempotent re-runs (ADR-013).
+  - `add <id>` command with `--dir`, `--dry-run`, `--yes`, `--json`; `list` shows add-ons.
+  - `ai-workflows` (Claude Code): owner AGENTS.md verbatim, `CLAUDE.md` import, 11 skills, 6 subagents, 3 hooks in exec form (ADR-014), settings merge that adds only hooks and `ask` rules; structural validators.
+  - `ci-github`: CI workflow for npm/pnpm with SHA-pinned actions and read-only permissions (ADR-015).
+  - Docs: [AI-WORKFLOWS.md](AI-WORKFLOWS.md) with a manual checklist for Claude Code.
+- P8 (Codex, Antigravity, more skills such as UI/UX) recorded for after v0.1, as agreed by default.
 
 ## Verification (Windows 11, Node 24.18.1, npm 12.1.0, pnpm 12.15.0)
 
-| Check                                                                                                                                   | Result                                                                                                          |
-| --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `pnpm check`: typecheck, lint, format, build                                                                                            | PASS                                                                                                            |
-| `vitest run`: 113 tests in 9 files                                                                                                      | PASS                                                                                                            |
-| Pack smoke: tarball contents incl. template assets; installed package generates a project                                               | PASS                                                                                                            |
-| `test:recipes` express-mongoose / pnpm: create+install, typecheck, lint, format, test, build                                            | PASS                                                                                                            |
-| `test:recipes` express-mongoose / npm: same steps                                                                                       | PASS                                                                                                            |
-| Generated project: 29 tests (4 files), `npm audit` (all deps)                                                                           | PASS, 0 vulnerabilities                                                                                         |
-| Generated server, real process: missing config → exit 1; unreachable DB → exit 1; real start → `/health`, `/health/ready`, list, create | PASS                                                                                                            |
-| `docker compose config` on the generated Compose file                                                                                   | BLOCKED: Docker not installed                                                                                   |
-| Graceful shutdown via a real SIGTERM                                                                                                    | NOT RUN: Windows has no POSIX signals; `close()` path covered by the generated integration test; Linux CI in P7 |
-| Interactive prompts in a real terminal                                                                                                  | NOT RUN: needs a human at a terminal                                                                            |
-| Linux / macOS, Node 22 / 26                                                                                                             | NOT RUN: CI in P7                                                                                               |
+| Check                                                                                                                                                                 | Result                                          |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `pnpm check`: typecheck, lint, format, build                                                                                                                          | PASS                                            |
+| `vitest run`: 196 tests in 15 files                                                                                                                                   | PASS                                            |
+| Pack smoke: tarball includes `assets/ai`; installed package generates express-mongoose and applies ai-workflows                                                       | PASS                                            |
+| `add ai-workflows` in a scratch project: 27 files written, 4 structural checks PASS, user `allow` rule and `model` setting preserved, second run "already up to date" | PASS                                            |
+| Hook scripts run as real processes with JSON stdin (bash guard, file guard incl. Windows paths, session start)                                                        | PASS                                            |
+| Skills and agents load and behave well inside Claude Code (manual checklist in AI-WORKFLOWS.md)                                                                       | NOT RUN: needs a human in a Claude Code session |
+| Generated `ci.yml` running on GitHub Actions                                                                                                                          | NOT RUN: needs a push to a GitHub repository    |
+| express-mongoose full recipe run with npm after the P3 asset-loader refactor (create+install, typecheck, lint, format, test, build)                                   | PASS                                            |
+| Docker, Linux/macOS, Node 22/26                                                                                                                                       | BLOCKED / NOT RUN: Docker missing; CI in P7     |
 
 ## Known issues / notes
 
-- The first test run of a generated Express project downloads a MongoDB binary (mongodb-memory-server); needs internet once.
-- Generated projects require Node ≥ 22.13 (ESLint 10), slightly above the CLI's own ≥ 22.12.
+- Reviewer subagents have no Edit/Write tools, but Bash could still change files (documented limitation).
+- Hooks fail open by design; `permissions.ask` rules are the dependable control.
+- Add-on removal is not automated (documented manual steps).
 - Owner actions pending: trademark search, domain purchase.
 
 ## Next
 
-P3: add-on engine (`add` command, plan/preview/backup/apply/verify) and the `ai-workflows` add-on for Claude Code. Open question for the owner: should part of P8 (Codex/Antigravity, more skills) move into v0.1?
+P4: Vite + React + TypeScript + Tailwind recipe (create-vite pinned + Tailwind overlay, theme and accessibility example, Playwright + axe at three viewports).

@@ -28,6 +28,14 @@ try {
   check(files.includes('dist/cli/index.js'), 'tarball contains dist/cli/index.js');
   check(files.includes('LICENSE'), 'tarball contains LICENSE');
   check(files.includes('README.md'), 'tarball contains README.md');
+  for (const file of [
+    'assets/ai/AGENTS.md',
+    'assets/ai/workflow.json',
+    'assets/ai/hooks/stackjoist-bash-guard.mjs',
+    'assets/ai/skills/orchestrate/SKILL.md',
+  ]) {
+    check(files.includes(file), `tarball contains ${file}`);
+  }
   for (const asset of ['_gitignore', '.env.example', '.prettierrc.json', 'src/server.ts']) {
     const file = `assets/templates/express-mongoose/${asset}`;
     check(files.includes(file), `tarball contains ${file}`);
@@ -97,6 +105,13 @@ try {
   check(
     demoFiles.includes('.gitignore') && demoFiles.includes('package.json'),
     'installed package generates express-mongoose',
+  );
+
+  const added = await bin('stackjoist', ['add', 'ai-workflows', '--yes', '--json']);
+  const claudeFiles = added.exitCode === 0 ? await readdir(path.join(app, '.claude')) : [];
+  check(
+    claudeFiles.includes('skills') && claudeFiles.includes('settings.json'),
+    'installed package applies ai-workflows',
   );
 } finally {
   await rm(work, { recursive: true, force: true });

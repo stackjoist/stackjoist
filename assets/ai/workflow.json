@@ -1,0 +1,5 @@
+{
+  "name": "stackjoist-ai-workflow",
+  "version": "0.1.0",
+  "targets": ["claude-code"]
+}

@@ -49,7 +49,7 @@ export default tseslint.config(
   { files: ['src/commands/**'], rules: restrictLayers(['cli']) },
   { files: ['**/*.js', '**/*.mjs'], ...tseslint.configs.disableTypeChecked },
   {
-    files: ['scripts/**/*.mjs'],
+    files: ['scripts/**/*.mjs', 'assets/ai/hooks/**/*.mjs'],
     languageOptions: {
       globals: { URL: 'readonly', process: 'readonly', console: 'readonly' },
     },
