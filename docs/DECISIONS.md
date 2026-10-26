@@ -1,10 +1,16 @@
 # Decisions
 
-Format: context, decision, alternatives, consequences, status. Details of each option are in [PROPOSAL.md](PROPOSAL.md) until it is split into the source-of-truth docs.
+Format: context, decision, alternatives, consequences, status. The original baseline proposal is in git history (commit `10c6bf2`, `docs/PROPOSAL.md`).
 
 ---
 
+## ADR-000 — Baseline approved
+
+- **Date:** 2026-10-26 · **Status:** Accepted (owner: "etai final, shuru koro")
+- **Decision:** The baseline proposal is approved with the owner's answers (ADR-001…007). Implementation proceeds phase by phase per [TASKS.md](TASKS.md).
+
 ## ADR-001 — v0.1 scope includes all four initial recipes
+
 - **Date:** 2026-10-26 · **Status:** Accepted (owner, answer to Q2)
 - **Context:** The proposal recommended v0.1 = Express + Vite, with Next.js and NestJS+Prisma in v0.2.
 - **Decision:** v0.1 ships all four recipes: Express+Mongoose, Vite+React+Tailwind, Next.js+Tailwind, NestJS+PostgreSQL+Prisma.
@@ -12,31 +18,60 @@ Format: context, decision, alternatives, consequences, status. Details of each o
 - **Consequences:** Roadmap phases P6 (Next.js) and P7 (NestJS+Prisma) move into the v0.1 MVP, and release readiness (P5) moves after them. CI cost and the verification matrix grow; each recipe must still be fully verified before release.
 
 ## ADR-002 — Prisma pinned to the stable 7.x line
+
 - **Date:** 2026-10-26 · **Status:** Accepted (owner, Q3)
 - **Context:** npm `latest` for `prisma` points to `8.0.0-rc.27`; last stable is `7.10.1`.
 - **Decision:** The NestJS recipe uses Prisma 7.x stable. Prisma 7's configuration and client-generation workflow is verified against the installed version's docs during P7.
 - **Consequences:** A later move to Prisma 8 is a deliberate, separately tested upgrade.
 
 ## ADR-003 — Owner's AGENTS.md is installed verbatim in generated projects
+
 - **Date:** 2026-10-26 · **Status:** Accepted (owner, Q4)
 - **Decision:** `add ai-workflows` installs the owner's `AGENTS.md` unchanged as a managed, hash-tracked file. `CLAUDE.md` gets `@AGENTS.md`. Updates follow the managed-file rule: unchanged files are replaced; user-edited files get a `.stackforge-new` sibling instead.
 - **Alternatives:** A short AGENTS.md pointing to a versioned copy under `.stackforge/policy/` (rejected).
 - **Consequences:** One policy text everywhere. Its stack-specific sections are already conditional ("when used").
 
 ## ADR-004 — AI workflow delivered as managed files in `.claude/`
+
 - **Date:** 2026-10-26 · **Status:** Accepted (owner, Q5)
 - **Decision:** Skills, agents and hooks are written into the project's `.claude/` folder and committed with it. A Claude Code plugin/marketplace distribution is not part of v0.1.
 - **Consequences:** Works for the whole team without extra install steps. StackForge owns update and conflict handling through `.stackforge/ai-manifest.json`.
 
 ## ADR-005 — License and author
+
 - **Date:** 2026-10-26 · **Status:** Accepted (owner, Q6)
 - **Decision:** MIT license. Author: Khaled Siddique <khaledssbd@gmail.com>. Repository URL to be added once the name is final.
 
 ## ADR-006 — Supported package managers: npm and pnpm
+
 - **Date:** 2026-10-26 · **Status:** Accepted (owner, Q7)
 - **Decision:** v0.1 verifies npm and pnpm only. Yarn and Bun are detected and reported as unsupported with a clear message.
 
-## ADR-007 — Package name
-- **Date:** 2026-10-26 · **Status:** Open — owner choosing
-- **Context:** `create-stackforge`, `stackforge` and `stackforge-cli` are taken on npm by unrelated projects, one with near-identical scope.
-- **Candidates and checks (2026-10-26):** see the name research in PROGRESS.md. No formal trademark search (USPTO/WIPO) was done.
+## ADR-007 — Name: StackJoist
+
+- **Date:** 2026-10-26 · **Status:** Accepted (owner)
+- **Context:** `create-stackforge`, `stackforge` and `stackforge-cli` are taken on npm by unrelated projects, one with near-identical scope. Owner prioritised SEO and a unique brand term.
+- **Decision:** Brand **StackJoist**; npm package `create-stackjoist`; bins `create-stackjoist` and `stackjoist`; repository https://github.com/stackjoist/stackjoist (organization owned by the owner's personal account).
+- **Checks (2026-10-26):** npm `create-stackjoist`, `stackjoist`, `stack-joist` unregistered; GitHub name `stackjoist` was free (now the org); `stackjoist.com/.dev/.io` unregistered via RDAP; no existing software found by web search.
+- **Alternatives:** stackmason (owner saw it in search results), plinthkit, keelstack, lintelkit; trussjs (npm would reject: punctuation-only difference from `truss.js`).
+- **Consequences / risks:** "Joist" is used by a contractor app and the `joist` TS ORM; mild confusion risk for the bare word. npm names cannot be reserved before the first publish. Formal trademark search and domain purchase are owner actions.
+
+## ADR-008 — TypeScript 6.0.x for development
+
+- **Date:** 2026-10-26 · **Status:** Accepted
+- **Context:** TypeScript 7.0 (native compiler) is the latest release, but `typescript-eslint@8.72` declares `typescript >=4.8.4 <6.1.0`.
+- **Decision:** Use TypeScript 6.0.x. Revisit when `typescript-eslint` supports 7.x.
+
+## ADR-009 — Single package, two bins, plain `tsc`
+
+- **Date:** 2026-10-26 · **Status:** Accepted (part of the approved baseline)
+- **Decision:** One npm package (no monorepo) exposing `create-stackjoist` and `stackjoist`, both running the same CLI. Build with plain `tsc` (no bundler). The AI workflow carries its own version in `assets/ai/workflow.json`.
+- **Alternatives:** pnpm monorepo with separate packages; tsup/tsdown bundling.
+- **Revisit when:** the AI workflow needs an independent release cadence, or CLI startup time measurably needs bundling.
+
+## ADR-010 — Own npm-name validator instead of `validate-npm-package-name`
+
+- **Date:** 2026-10-26 · **Status:** Accepted
+- **Context:** `validate-npm-package-name@8` requires Node `^22.22.2 || ^24.15.0 || >=26`, narrower than our `>=22.12`. We also need extra filesystem rules (Windows reserved names, traversal) that it does not cover.
+- **Decision:** Implement the documented npm naming rules plus filesystem rules in `src/core/names.ts`, covered by table-driven tests.
+- **Consequences:** One fewer runtime dependency; we maintain the rules ourselves.

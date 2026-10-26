@@ -1,0 +1,65 @@
+{
+  "name": "create-stackjoist",
+  "version": "0.0.0",
+  "description": "Scaffold verified TypeScript projects and install a versioned AI development workflow.",
+  "keywords": [
+    "create",
+    "scaffold",
+    "cli",
+    "typescript",
+    "template",
+    "claude-code",
+    "ai-workflow"
+  ],
+  "homepage": "https://github.com/stackjoist/stackjoist#readme",
+  "bugs": {
+    "url": "https://github.com/stackjoist/stackjoist/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stackjoist/stackjoist.git"
+  },
+  "license": "MIT",
+  "author": "Khaled Siddique <khaledssbd@gmail.com>",
+  "type": "module",
+  "bin": {
+    "create-stackjoist": "dist/cli/index.js",
+    "stackjoist": "dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@12.15.0",
+  "scripts": {
+    "build": "node scripts/clean.mjs && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:unit": "vitest run test/unit",
+    "test:cli": "pnpm build && vitest run test/cli",
+    "test:pack": "pnpm build && node scripts/pack-smoke.mjs",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm build && vitest run && node scripts/pack-smoke.mjs"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.8.1",
+    "commander": "^15.0.0",
+    "execa": "^10.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.5",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^5.0.5"
+  }
+}
