@@ -1,4 +1,4 @@
-import { readdir, readFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execa } from 'execa';
@@ -40,7 +40,7 @@ describe('CLI', () => {
     expect(r.exitCode).toBe(0);
     const body = JSON.parse(r.stdout) as { templates: { id: string }[]; addons: unknown[] };
     expect(body.templates.map((t) => t.id)).toContain('express-mongoose');
-    expect(body.addons).toEqual([]);
+    expect(body.addons.map((a) => (a as { id: string }).id)).toEqual(['ai-workflows', 'ci-github']);
   });
 
   it('runs doctor and returns structured checks', async () => {
@@ -106,5 +106,15 @@ describe('CLI', () => {
     expect(await readdir(cwd)).toEqual(['my-api']);
     const files = await readdir(path.join(cwd, 'my-api'));
     expect(files).toEqual(expect.arrayContaining(['package.json', '.gitignore', 'src', 'test']));
+  });
+
+  it('previews an add-on without writing anything', async () => {
+    const cwd = await tempDir();
+    await writeFile(path.join(cwd, 'package.json'), '{"name":"demo"}');
+    const r = await run(['add', 'ai-workflows', '--dry-run', '--json'], cwd);
+    expect(r.exitCode).toBe(0);
+    const body = JSON.parse(r.stdout) as { changes: Array<{ path: string; action: string }> };
+    expect(body.changes).toContainEqual({ path: 'AGENTS.md', action: 'create' });
+    expect(await readdir(cwd)).toEqual(['package.json']);
   });
 });

@@ -1,10 +1,10 @@
-import { readdir, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { ASSETS_ROOT, listFiles } from '../core/assets.js';
 import type { WriteFileOp } from '../core/plan.js';
 
 /** `assets/templates`, resolved the same way from `src/recipes` and from `dist/recipes`. */
-export const TEMPLATES_ROOT = fileURLToPath(new URL('../../assets/templates/', import.meta.url));
+export const TEMPLATES_ROOT = path.join(ASSETS_ROOT, 'templates');
 
 /**
  * npm never packs files named `.gitignore`, so templates store them under a
@@ -18,17 +18,6 @@ export interface TemplateOptions {
   /** Files (template-relative, "/" separated) whose `{{key}}` placeholders are substituted. */
   substitute: readonly string[];
   values: Readonly<Record<string, string>>;
-}
-
-async function listFiles(dir: string, prefix = ''): Promise<string[]> {
-  const entries = await readdir(dir, { withFileTypes: true });
-  const files: string[] = [];
-  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-    const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
-    if (entry.isDirectory()) files.push(...(await listFiles(path.join(dir, entry.name), relative)));
-    else if (entry.isFile()) files.push(relative);
-  }
-  return files;
 }
 
 function substitute(file: string, text: string, values: TemplateOptions['values']): string {

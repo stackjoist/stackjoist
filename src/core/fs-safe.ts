@@ -150,3 +150,35 @@ export async function writeFileInside(
   // 'wx' fails instead of overwriting if the file already exists.
   await writeFile(target, content, { flag: 'wx' });
 }
+
+/** Reads a project file as UTF-8, or returns undefined if it does not exist. */
+export async function readFileInside(root: string, relative: string): Promise<string | undefined> {
+  const target = await resolveInside(root, relative);
+  try {
+    return await readFile(target, 'utf8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
+    throw error;
+  }
+}
+
+/**
+ * Creates or replaces a file via a temporary file and a rename, so a crash never
+ * leaves a half-written file behind. Callers are responsible for backups.
+ */
+export async function replaceFileInside(
+  root: string,
+  relative: string,
+  content: string | Uint8Array,
+): Promise<void> {
+  const target = await resolveInside(root, relative);
+  await mkdir(path.dirname(target), { recursive: true });
+  const temp = `${target}.stackjoist-tmp-${process.pid}-${Date.now()}`;
+  await writeFile(temp, content, { flag: 'wx' });
+  try {
+    await rename(temp, target);
+  } catch (error) {
+    await rm(temp, { force: true });
+    throw error;
+  }
+}

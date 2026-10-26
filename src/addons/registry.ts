@@ -1,8 +1,6 @@
-/** Minimal description used by `list`; the full add-on manifest arrives with the add-on engine (P3). */
-export interface AddonSummary {
-  id: string;
-  title: string;
-  description: string;
-}
+import { aiWorkflows } from './ai-workflows/addon.js';
+import { ciGithub } from './ci-github/addon.js';
+import type { Addon } from './types.js';
 
-export const addons: readonly AddonSummary[] = [];
+/** Add-ons shipped with this version. */
+export const addons: readonly Addon[] = [aiWorkflows, ciGithub];

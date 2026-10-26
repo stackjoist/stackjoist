@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { Command, CommanderError } from 'commander';
 import { addons } from '../addons/registry.js';
 import type { CommandContext } from '../commands/context.js';
+import { runAdd } from '../commands/add.js';
 import { runCreate } from '../commands/create.js';
 import { runDoctor } from '../commands/doctor.js';
 import { runList } from '../commands/list.js';
@@ -106,6 +107,37 @@ program
   .option('--json', 'machine-readable output')
   .action((opts: CommonFlags) => {
     runList(context(opts), recipes, addons);
+  });
+
+program
+  .command('add <id>')
+  .description('add a capability to an existing project (see "list")')
+  .option('--dir <path>', 'project directory (default: current directory)')
+  .option('--dry-run', 'show what would change without writing anything')
+  .option('-y, --yes', 'apply without asking; refuses if files conflict')
+  .option('--json', 'machine-readable output')
+  .option('--debug', 'show stack traces')
+  .addHelpText(
+    'after',
+    `
+Examples:
+  npx create-stackjoist add ai-workflows --dry-run
+  npx create-stackjoist add ai-workflows
+  npx create-stackjoist add ci-github --yes
+
+Existing files are never overwritten. Replaced files are backed up in .stackjoist/backups/.`,
+  )
+  .action(async (id: string, opts: CommonFlags & { dir?: string; dryRun?: boolean }) => {
+    await runAdd(
+      {
+        id,
+        ...(opts.dir === undefined ? {} : { dir: opts.dir }),
+        dryRun: opts.dryRun === true,
+        yes: opts.yes === true,
+      },
+      context(opts),
+      addons,
+    );
   });
 
 program
