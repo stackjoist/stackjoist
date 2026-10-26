@@ -46,7 +46,8 @@
     "test:unit": "vitest run test/unit",
     "test:cli": "pnpm build && vitest run test/cli",
     "test:pack": "pnpm build && node scripts/pack-smoke.mjs",
-    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm build && vitest run && node scripts/pack-smoke.mjs"
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm build && vitest run && node scripts/pack-smoke.mjs",
+    "test:recipes": "pnpm build && node scripts/verify-recipes.mjs"
   },
   "dependencies": {
     "@clack/prompts": "^1.8.1",

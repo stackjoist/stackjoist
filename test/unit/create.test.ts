@@ -25,14 +25,16 @@ const fixtureRecipe: Recipe = {
   title: 'Fixture',
   description: 'test recipe',
   packageManagers: ['npm', 'pnpm'],
-  plan: ({ projectName }) => ({
-    ops: [
-      { kind: 'write', path: 'package.json', content: JSON.stringify({ name: projectName }) },
-      { kind: 'run', label: 'Run generator', file: 'fixture-gen', args: [projectName] },
-      { kind: 'write', path: 'src/index.ts', content: 'export {};\n' },
-    ],
-  }),
+  plan: ({ projectName }) =>
+    Promise.resolve({
+      ops: [
+        { kind: 'write', path: 'package.json', content: JSON.stringify({ name: projectName }) },
+        { kind: 'run', label: 'Run generator', file: 'fixture-gen', args: [projectName] },
+        { kind: 'write', path: 'src/index.ts', content: 'export {};\n' },
+      ],
+    }),
   nextSteps: ({ packageManager }) => [`${packageManager} run dev`],
+  verify: [],
 };
 
 const defaults: CreateOptions = {

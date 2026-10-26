@@ -17,7 +17,7 @@ const restrictLayers = (forbidden) => ({
 });
 
 export default tseslint.config(
-  { ignores: ['dist/', 'coverage/', 'node_modules/'] },
+  { ignores: ['dist/', 'coverage/', 'node_modules/', 'assets/templates/'] },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   {

@@ -75,3 +75,17 @@ Format: context, decision, alternatives, consequences, status. The original base
 - **Context:** `validate-npm-package-name@8` requires Node `^22.22.2 || ^24.15.0 || >=26`, narrower than our `>=22.12`. We also need extra filesystem rules (Windows reserved names, traversal) that it does not cover.
 - **Decision:** Implement the documented npm naming rules plus filesystem rules in `src/core/names.ts`, covered by table-driven tests.
 - **Consequences:** One fewer runtime dependency; we maintain the rules ourselves.
+
+## ADR-011 — pnpm build-script policy in generated projects
+
+- **Date:** 2026-10-26 · **Status:** Accepted
+- **Context:** pnpm 12 fails `pnpm install` (`ERR_PNPM_IGNORED_BUILDS`) when a dependency has an install script that is not reviewed in `allowBuilds` (pnpm ≥ 10.26; the older `onlyBuiltDependencies` family was removed in pnpm 11). The Express recipe pulls in `esbuild` (via `tsx`) and `mongodb-memory-server`.
+- **Decision:** For pnpm, recipes write `pnpm-workspace.yaml` with an explicit `allowBuilds` entry per package. Both are set to `false`: esbuild's script only verifies its binary, and mongodb-memory-server downloads MongoDB on first use anyway. Verified: install, tests and build pass with both denied.
+- **Consequences:** Fewer scripts run on users' machines. Each new recipe must review its own install scripts. npm still runs install scripts as usual.
+
+## ADR-012 — First-party templates shipped inside the package
+
+- **Date:** 2026-10-26 · **Status:** Accepted
+- **Decision:** Template files live in `assets/templates/<recipe>/` and are copied as-is; only listed files get `{{placeholder}}` substitution, and unknown placeholders fail generation. `package.json` is generated in code so tested version ranges live in one place. `.gitignore` is stored as `_gitignore` because npm never packs `.gitignore`.
+- **Alternatives:** Downloading templates at runtime (rejected: network dependency, supply-chain risk); copying from a git repo (same).
+- **Consequences:** Templates are versioned with the CLI and verified by the pack smoke test from an installed tarball.

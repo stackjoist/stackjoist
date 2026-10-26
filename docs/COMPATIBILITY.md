@@ -14,12 +14,12 @@ Versions checked with `npm view` on 2026-10-26. "Pinned" means the exact version
 
 ## Recipes _(filled in as each recipe is verified)_
 
-| Recipe                  | Upstream / key versions              | Status       |
-| ----------------------- | ------------------------------------ | ------------ |
-| Express + Mongoose      | express 5.x, mongoose 9.x, zod 4.x   | planned (P2) |
-| Vite + React + Tailwind | create-vite 9.3.1, tailwindcss 4.3.x | planned (P4) |
-| Next.js + Tailwind      | create-next-app 16.4.x               | planned (P5) |
-| NestJS + Prisma         | @nestjs/cli 12.x, prisma 7.x stable  | planned (P6) |
+| Recipe                  | Upstream / key versions                                                                                                                                          | Status                                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Express + Mongoose      | express ^5.3.0, mongoose ^9.11.4, zod ^4.6.7, typescript ~6.0.3. Generated project needs Node >= 22.13 (ESLint 10) and, with pnpm, pnpm >= 10.26 (`allowBuilds`) | Verified 2026-10-26 with npm 12.1.0 and pnpm 12.15.0 on Windows 11 / Node 24.18.1 (Linux/macOS: CI in P7) |
+| Vite + React + Tailwind | create-vite 9.3.1, tailwindcss 4.3.x                                                                                                                             | planned (P4)                                                                                              |
+| Next.js + Tailwind      | create-next-app 16.4.x                                                                                                                                           | planned (P5)                                                                                              |
+| NestJS + Prisma         | @nestjs/cli 12.x, prisma 7.x stable                                                                                                                              | planned (P6)                                                                                              |
 
 ## Known upstream facts
 

@@ -4,16 +4,17 @@ Status values: Todo / In Progress / Blocked / Done. Phases follow the approved b
 
 ## Roadmap
 
-| Phase | Goal                                                       | Depends on | Status |
-| ----- | ---------------------------------------------------------- | ---------- | ------ |
-| P0    | Audit, baseline, decisions, docs                           | —          | Done   |
-| P1    | CLI core                                                   | P0         | Done   |
-| P2    | Recipe engine + Express + MongoDB + Mongoose               | P1         | Todo   |
-| P3    | Add-on engine + `ai-workflows` (Claude Code) + `ci-github` | P1         | Todo   |
-| P4    | Vite + React + TS + Tailwind                               | P2         | Todo   |
-| P5    | Next.js + TS + Tailwind                                    | P4         | Todo   |
-| P6    | NestJS + PostgreSQL + Prisma 7.x                           | P2         | Todo   |
-| P7    | CI, docs, release readiness v0.1 (no publish)              | P2–P6      | Todo   |
+| Phase | Goal                                                                                                                         | Depends on | Status |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------- | ---------- | ------ |
+| P0    | Audit, baseline, decisions, docs                                                                                             | —          | Done   |
+| P1    | CLI core                                                                                                                     | P0         | Done   |
+| P2    | Recipe engine + Express + MongoDB + Mongoose                                                                                 | P1         | Done   |
+| P3    | Add-on engine + `ai-workflows` (Claude Code) + `ci-github`                                                                   | P1         | Todo   |
+| P4    | Vite + React + TS + Tailwind                                                                                                 | P2         | Todo   |
+| P5    | Next.js + TS + Tailwind                                                                                                      | P4         | Todo   |
+| P6    | NestJS + PostgreSQL + Prisma 7.x                                                                                             | P2         | Todo   |
+| P7    | CI, docs, release readiness v0.1 (no publish)                                                                                | P2–P6      | Todo   |
+| P8    | Multi-agent: Codex + Google Antigravity adapters; expanded skills library (UI/UX design, and more, owner request 2026-10-26) | P3         | Todo   |
 
 ---
 
@@ -44,6 +45,31 @@ Status values: Todo / In Progress / Blocked / Done. Phases follow the approved b
 | T1.10 | Pack-and-install smoke           | `npm pack` → install tarball in temp dir → `create-stackjoist --help`, `stackjoist list`, `doctor` run                                                                                                                                                                      | scripted test                                                         | Done   |
 | T1.11 | DEVELOPMENT.md + minimal README  | Verified commands only; README states current status honestly                                                                                                                                                                                                               | review                                                                | Done   |
 
-## P2–P7
+## P2 — Recipe engine + Express + MongoDB + Mongoose
+
+**Goal:** the first real template, generated from first-party files shipped in the package, and verified by actually installing and testing the generated project.
+**Non-goals:** upstream generators (P4+), add-ons (P3), a `--verify` flag on `create` (decide after P4), production deployment config.
+
+| ID   | Task                         | Acceptance criteria                                                                                                                                                                                                                                                                            | Verification                                    | Status |
+| ---- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ------ |
+| T2.1 | Template asset loader        | Recipes read files from `assets/templates/<id>/` in both the source tree and an installed tarball; dotfiles npm strips (`.gitignore`) are stored as `_gitignore` and renamed; only listed placeholders are substituted                                                                         | unit tests + pack smoke                         | Done   |
+| T2.2 | Express + Mongoose template  | Express 5, Mongoose 9, Zod 4 env + request validation, helmet, configurable CORS, pino logging, `app`/`server` split, `/health` + `/health/ready`, central 404/error handling, graceful shutdown, startup failure exits non-zero, Docker Compose MongoDB, `.env.example`, example `notes` CRUD | generated project's own tests                   | Done   |
+| T2.3 | Generated-project tests      | Unit tests (env, errors, validation) + HTTP integration tests (Supertest + mongodb-memory-server) incl. invalid input, invalid ObjectId, 404, pagination limits, startup + shutdown                                                                                                            | run inside generated project                    | Done   |
+| T2.4 | Recipe registration + engine | `express-mongoose` in the registry; `plan()` async; package.json generated from code with tested version ranges; next steps printed                                                                                                                                                            | unit tests for the plan                         | Done   |
+| T2.5 | Verify runner                | `src/verify` runs a recipe's checks and reports PASS/FAIL/NOT RUN/BLOCKED                                                                                                                                                                                                                      | unit tests                                      | Done   |
+| T2.6 | Full recipe verification     | Script generates the recipe with npm and with pnpm in temp dirs → install → typecheck → lint → test → build; Compose file validated where Docker exists, else BLOCKED                                                                                                                          | `pnpm test:recipes` output recorded in PROGRESS | Done   |
+
+## P3–P7
 
 Detailed tasks are written at the start of each phase. Summary acceptance criteria live in [PRD.md](PRD.md#acceptance-criteria-v01).
+
+## P8 — Multi-agent adapters and expanded skills (owner request, 2026-10-26)
+
+**Goal:** the same AI workflow for more coding agents, and a larger skills library.
+**Scope (to be detailed when P8 starts):**
+
+- Adapters for **OpenAI Codex** and **Google Antigravity**, each verified against that agent's current official docs (file locations, skill/rule format, subagent and hook support) before any compatibility is claimed. The neutral definitions in `assets/ai/` (P3) are designed so adapters can be added without rewriting skills.
+- More skills beyond the P3 core set, for example a **UI/UX design** skill (layout, typography, spacing, design-system use, responsive and accessible design). Each new skill keeps the P3 quality bar: clear triggers, steps, safety limits, verification and an honest definition of done.
+- Input: the owner's existing `multi-agent-setup` skill (Antigravity / OpenCode / Copilot setup) as a reference for what already works in practice.
+
+**Open question for the owner:** keep P8 after v0.1, or move some of it into v0.1.

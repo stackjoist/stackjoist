@@ -1,6 +1,6 @@
 // Packs the package, inspects the tarball and runs the CLI from a clean install.
 // This is what users get from npm, so it must work without the source tree.
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,8 +28,16 @@ try {
   check(files.includes('dist/cli/index.js'), 'tarball contains dist/cli/index.js');
   check(files.includes('LICENSE'), 'tarball contains LICENSE');
   check(files.includes('README.md'), 'tarball contains README.md');
-  const forbidden = files.filter((f) =>
-    /^(src|test|docs|scripts|node_modules)\/|^\.env|\.test\.|^AGENTS\.md$|^CLAUDE\.md$/.test(f),
+  for (const asset of ['_gitignore', '.env.example', '.prettierrc.json', 'src/server.ts']) {
+    const file = `assets/templates/express-mongoose/${asset}`;
+    check(files.includes(file), `tarball contains ${file}`);
+  }
+  // Template files are shipped on purpose (including their tests); everything else is checked.
+  const forbidden = files.filter(
+    (f) =>
+      /(^|\/)\.env$|(^|\/)node_modules\//.test(f) ||
+      (!f.startsWith('assets/templates/') &&
+        /^(src|test|docs|scripts)\/|\.test\.|^AGENTS\.md$|^CLAUDE\.md$/.test(f)),
   );
   check(
     forbidden.length === 0,
@@ -73,6 +81,23 @@ try {
 
   const doctor = await bin('stackjoist', ['doctor', '--json']);
   check(doctor.exitCode === 0 && JSON.parse(doctor.stdout).ok === true, 'stackjoist doctor --json');
+
+  // Proves templates resolve from node_modules, not from the source tree.
+  const generated = await bin('create-stackjoist', [
+    'demo',
+    '--template',
+    'express-mongoose',
+    '--pm',
+    'npm',
+    '--no-install',
+    '--no-git',
+    '--json',
+  ]);
+  const demoFiles = generated.exitCode === 0 ? await readdir(path.join(app, 'demo')) : [];
+  check(
+    demoFiles.includes('.gitignore') && demoFiles.includes('package.json'),
+    'installed package generates express-mongoose',
+  );
 } finally {
   await rm(work, { recursive: true, force: true });
 }

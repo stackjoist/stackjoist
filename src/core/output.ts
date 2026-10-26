@@ -1,5 +1,5 @@
 import { log } from '@clack/prompts';
-import { StackJoistError } from './errors.js';
+import { ExternalToolError, StackJoistError } from './errors.js';
 
 export type CheckStatus = 'PASS' | 'FAIL' | 'NOT RUN' | 'BLOCKED';
 
@@ -18,9 +18,15 @@ export interface Output {
   error(error: unknown, debug: boolean): void;
 }
 
+const TOOL_OUTPUT_LINES = 25;
+
 function describe(error: unknown, debug: boolean): string {
   if (error instanceof StackJoistError) {
     const lines = [error.message];
+    if (error instanceof ExternalToolError && error.output) {
+      const tail = error.output.split(/\r?\n/).slice(-TOOL_OUTPUT_LINES).join('\n');
+      lines.push(`Output of "${error.command}" (last lines):`, tail);
+    }
     if (error.hint) lines.push(`Hint: ${error.hint}`);
     if (debug && error.stack) lines.push(error.stack);
     return lines.join('\n');

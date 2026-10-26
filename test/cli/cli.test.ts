@@ -1,4 +1,5 @@
 import { readdir, readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execa } from 'execa';
 import { describe, expect, it } from 'vitest';
@@ -37,7 +38,9 @@ describe('CLI', () => {
   it('lists templates and add-ons as JSON', async () => {
     const r = await run(['list', '--json']);
     expect(r.exitCode).toBe(0);
-    expect(JSON.parse(r.stdout)).toEqual({ templates: [], addons: [] });
+    const body = JSON.parse(r.stdout) as { templates: { id: string }[]; addons: unknown[] };
+    expect(body.templates.map((t) => t.id)).toContain('express-mongoose');
+    expect(body.addons).toEqual([]);
   });
 
   it('runs doctor and returns structured checks', async () => {
@@ -61,11 +64,47 @@ describe('CLI', () => {
     expect(await readdir(cwd)).toEqual([]);
   });
 
-  it('reports that no recipes exist yet with exit code 3', async () => {
+  it('requires --template when it cannot prompt, and names the options', async () => {
     const cwd = await tempDir();
     const r = await run(['my-app', '--yes', '--json'], cwd);
-    expect(r.exitCode).toBe(3);
-    expect(JSON.parse(r.stdout)).toMatchObject({ ok: false, exitCode: 3 });
+    expect(r.exitCode).toBe(2);
+    expect(JSON.parse(r.stdout)).toMatchObject({ ok: false, exitCode: 2 });
+    expect(r.stdout).toContain('express-mongoose');
     expect(await readdir(cwd)).toEqual([]);
+  });
+
+  it('dry-runs a real template without writing anything', async () => {
+    const cwd = await tempDir();
+    const r = await run(
+      ['my-api', '--template', 'express-mongoose', '--pm', 'pnpm', '--dry-run', '--json'],
+      cwd,
+    );
+    expect(r.exitCode).toBe(0);
+    const body = JSON.parse(r.stdout) as { plan: string[] };
+    expect(body.plan).toContain('create  .gitignore');
+    expect(body.plan).toContain('create  pnpm-workspace.yaml');
+    expect(body.plan).toContain('run     pnpm install');
+    expect(await readdir(cwd)).toEqual([]);
+  });
+
+  it('generates a real template without installing', async () => {
+    const cwd = await tempDir();
+    const r = await run(
+      [
+        'my-api',
+        '--template',
+        'express-mongoose',
+        '--pm',
+        'npm',
+        '--no-install',
+        '--no-git',
+        '--json',
+      ],
+      cwd,
+    );
+    expect(r.exitCode).toBe(0);
+    expect(await readdir(cwd)).toEqual(['my-api']);
+    const files = await readdir(path.join(cwd, 'my-api'));
+    expect(files).toEqual(expect.arrayContaining(['package.json', '.gitignore', 'src', 'test']));
   });
 });

@@ -161,7 +161,7 @@ export async function runCreate(
   await checkTarget(target);
 
   const recipeCtx: RecipeContext = { projectName, packageManager };
-  const plan = recipe.plan(recipeCtx);
+  const plan = await recipe.plan(recipeCtx);
   const install = installCommand(packageManager);
 
   if (options.dryRun) {

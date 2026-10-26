@@ -39,7 +39,7 @@ The scaffolder and the AI workflow are independent; either can be used alone.
 - Express + Prisma/Drizzle, monorepo recipes, authentication starters, Redis/background jobs.
 - Remote or user-defined templates and presets.
 - Add-on removal (not claimed until implemented and tested).
-- Adapters for coding agents other than Claude Code.
+- Adapters for coding agents other than Claude Code (planned for P8: OpenAI Codex, Google Antigravity; see TASKS.md).
 - Yarn and Bun support.
 - A claude.ai/Claude Code plugin/marketplace distribution of the AI workflow.
 
